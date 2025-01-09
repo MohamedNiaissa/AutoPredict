@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Predict</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Submit your Info</h2>
+    <form id="infoForm" onsubmit="return submitForm(event)">
+        <div class="form-group">
+            <label for="brand">Marque:</label>
+            <input type="text" id="brand" name="brand" class="form-control" value="Honda" required>
+        </div>
+        <div class="form-group">
+            <label for="year">Année du model:</label>
+            <input type="number" id="year" name="year" class="form-control" value="2014" required>
+        </div>
+        <div class="form-group">
+            <label for="km_driven">km parcouru:</label>
+            <input type="number" id="km_driven" name="km_driven" class="form-control" value="141000" required>
+        </div>
+        <div class="form-group">
+            <label for="fuel">Carburant:</label>
+            <input type="text" id="fuel" name="fuel" class="form-control" value="Diesel" required>
+        </div>
+        <div class="form-group">
+            <label for="seller_type">Type de vendeur:</label>
+            <input type="text" id="seller_type" name="seller_type" class="form-control" value="Individual" required>
+        </div>
+        <div class="form-group">
+            <label for="transmission">Transmission:</label>
+            <input type="text" id="transmission" name="transmission" class="form-control" value="Manual" required>
+        </div>
+
+        <div>
+            <label for="owner">Choisir le propriétaire:</label>
+            <select name="owner" id="owner">
+                <option value="">--Choisir une option--</option>
+                <option value="First Owner">First Owner</option>
+                <option value="Second Owner">Second Owner</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

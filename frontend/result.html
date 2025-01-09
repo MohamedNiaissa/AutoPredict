@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission Result</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h3>Prix de la voiture:</h3>
+        <div id="result">
+        </div>
+    <a href="form.html" class="btn btn-secondary mt-3">Go Back</a>
+
+</div>
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        if (encodedData) {
+            const result = JSON.parse(decodeURIComponent(encodedData));
+            document.getElementById('result').innerHTML = `
+            <pre>${JSON.stringify(result.predicted_selling_price, null, 2)}</pre>
+        `;
+        }
+    };
+</script>
+</body>
+</html>
