@@ -1,0 +1,39 @@
+# Environnements virtuels
+.venv/
+env/
+venv/
+
+# Fichiers de configuration ou de logs temporaires
+*.log
+*.pyc
+__pycache__/
+
+# Artefacts générés par MLflow
+mlruns/
+mlartifacts/
+#*.pkl
+*.h5
+
+# Données brutes ou fichiers sensibles
+#data/*.csv
+#data/*.xlsx
+#data/*.json
+
+# Configurations locales ou spécifiques à l'IDE
+*.env
+.idea/
+.vscode/
+*.swp
+
+# Dépendances Python
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Fichiers générés par Jupyter
+.ipynb_checkpoints/
+
+# Clés ou certificats (exemple pour FastAPI HTTPS)
+*.pem
+*.key

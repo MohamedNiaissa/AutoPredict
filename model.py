@@ -8,7 +8,7 @@ from sklearn.preprocessing import OrdinalEncoder
 import joblib
 
 # Charger les données
-df = pd.read_csv("cartest.csv")
+df = pd.read_csv("./data/cartest.csv")
 
 # Préparer les données
 df["fuel"].replace({'Diesel': 0, 'Petrol': 1, 'LPG': 2, 'CNG': 3, 'Electric': 4}, inplace=True)
