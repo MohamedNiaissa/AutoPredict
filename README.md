@@ -5,9 +5,10 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
 ---
 
 ## Fonctionnalités
-- **Endpoint `/status`** : Permet de vérifier si l'API est prête.
-- **Endpoint `/predict`** : Permet d'envoyer les caractéristiques d'un véhicule et d'obtenir une estimation de son prix de vente.
-- **Endpoint `/metadata`** : Fournit des informations sur le modèle et les mappages utilisés pour la transformation des données.
+
+- **Endpoint ****`/status`** : Permet de vérifier si l'API est prête.
+- **Endpoint ****`/predict`** : Permet d'envoyer les caractéristiques d'un véhicule et d'obtenir une estimation de son prix de vente.
+- **Endpoint ****`/metadata`** : Fournit des informations sur le modèle et les mappages utilisés pour la transformation des données.
 
 ---
 
@@ -35,24 +36,56 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
     |-- requirements.txt       # Liste des dépendances
     |
     |-- data/                  # Données (exemple : cartest.csv)
-    |-- mlruns/                # Dossier généré par MLflow 
+    |-- mlruns/                # Dossier généré par MLflow (optionnel)
 ```
 
 ---
 
-## Lancer l'API
+## **Guide : Enregistrer et Tester un Modèle avec MLflow**
 
-1. Démarrez le serveur MLflow :
+### **Étape 1 : Préparer les données**
+Assurez-vous que les données nécessaires au modèle sont disponibles dans le dossier `data/` (exemple : `cartest.csv`).
+
+---
+
+### **Étape 2 : Entraîner et enregistrer le modèle**
+1. Naviguez dans le dossier contenant les scripts :
    ```bash
-   mlflow ui --host 127.0.0.1 --port 8080
+   cd scripts/OneHot
    ```
 
-2. Lancer le serveur FastAPI :
+2. Lancez le script `train_model.py` pour entraîner et enregistrer le modèle dans MLflow :
+   ```bash
+   python train_model.py
+   ```
+
+3. Une fois l'exécution terminée :
+   - Un nouveau modèle sera enregistré dans MLflow.
+   - Les métriques d'entraînment, comme le **Mean Squared Error**, seront affichées.
+   - Vous pouvez consulter le modèle et les artefacts associés dans l'interface MLflow :
+     [http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+---
+
+### **Étape 3 : Tester le modèle**
+1. Lancez le script `test_model.py` pour vérifier le fonctionnement du modèle avec des données de test :
+   ```bash
+   python test_model.py
+   ```
+
+2. Le script affichera :
+   - Les données de test utilisées.
+   - Les prédictions générées par le modèle.
+
+---
+
+### **Étape 4 : Lancer l'API**
+1. Une fois le modèle correctement enregistré et testé, lancez le serveur FastAPI pour servir le modèle :
    ```bash
    uvicorn main:app --reload
    ```
 
-3. Accédez à l'interface Swagger pour tester les endpoints :
+2. Testez les différents endpoints via l'interface Swagger :
    [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
@@ -62,11 +95,13 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
 ### 1. Tester l'Endpoint `/status`
 
 Requête :
+
 ```bash
 curl -X GET http://127.0.0.1:8000/status
 ```
 
 Réponse (exemple) :
+
 ```json
 {
   "status": "Model is ready for prediction"
@@ -76,6 +111,7 @@ Réponse (exemple) :
 ### 2. Tester l'Endpoint `/predict`
 
 Requête :
+
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
 -H "Content-Type: application/json" \
@@ -89,6 +125,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 ```
 
 Réponse (exemple) :
+
 ```json
 {
   "predicted_selling_price": 550000.0
@@ -98,11 +135,13 @@ Réponse (exemple) :
 ### 3. Tester l'Endpoint `/metadata`
 
 Requête :
+
 ```bash
 curl -X GET http://127.0.0.1:8000/metadata
 ```
 
 Réponse (exemple) :
+
 ```json
 {
   "model_uri": "models:/RandomForestPipeline/1",
@@ -126,14 +165,17 @@ Réponse (exemple) :
 ## Dépannage
 
 1. **Erreur : Modèle non trouvé**
+
    - Assurez-vous que le serveur MLflow est démarré.
    - Vérifiez l'URI du modèle dans MLflow (par exemple, `models:/RandomForestPipeline/1`).
 
 2. **Erreur : Données invalides**
+
    - Vérifiez les valeurs fournies dans la requête (par exemple, les valeurs pour `fuel` ou `transmission`).
    - Consultez l'endpoint `/metadata` pour les valeurs acceptées.
 
 3. **Erreur interne du serveur**
+
    - Lancez FastAPI en mode debug pour afficher plus de détails :
      ```bash
      uvicorn main:app --reload
