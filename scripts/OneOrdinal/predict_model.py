@@ -3,7 +3,7 @@ import mlflow.pyfunc
 
 # Charger le modèle depuis MLflow
 mlflow.set_tracking_uri("http://127.0.0.1:8080")
-model_uri = "models:/OptimizedRandomForestModel/16"  # Remplacer par la bonne version
+model_uri = "models:/OptimizedRandomForestModel/3"  # Remplacer par la bonne version
 model = mlflow.pyfunc.load_model(model_uri)
 print("Modèle chargé avec succès.")
 
