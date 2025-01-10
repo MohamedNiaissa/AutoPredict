@@ -1,96 +1,91 @@
 import pandas as pd
-import mlflow
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import make_column_transformer
 from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.metrics import mean_squared_error, r2_score
 from mlflow.models.signature import infer_signature
+import mlflow
 import mlflow.sklearn
-import joblib
+import numpy as np
 
 # Charger les données
 df = pd.read_csv("./data/cartest.csv")
 
-# Remplacer les valeurs textuelles par des valeurs numériques
+# Préparer les données
 df["fuel"] = df["fuel"].replace({'Diesel': 0, 'Petrol': 1, 'LPG': 2, 'CNG': 3, 'Electric': 4})
 df["transmission"] = df["transmission"].replace({'Automatic': 0, 'Manual': 1})
+df["owner"] = df["owner"].replace({'First Owner': 0, 'Second Owner': 1, 'Third Owner': 2, 'Fourth & Above Owner': 3, 'Test Drive Car': 4})
+df["seller_type"] = df["seller_type"].replace({'Dealer': 0, 'Individual': 1, 'Trustmark Dealer': 2})
 df["brand"] = df["name"].str.split().str[0]
 df = df.drop("name", axis=1)
 
-# Vérifier les valeurs manquantes
-if df.isnull().any().any():
-    print("Attention : Des valeurs manquantes sont présentes dans les données.")
-    df.fillna(-1, inplace=True)
-
-# Diviser les données
+# Séparer les features et la cible
 y = df["selling_price"]
 X = df.drop("selling_price", axis=1)
+
+# Diviser les données
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Préparer le pipeline
-cat_selector = ["fuel", "transmission", "brand"]
-num_selector = ["year", "km_driven"]
-
-tree_processor = make_column_transformer(
-    (SimpleImputer(strategy="mean"), num_selector),
-    (OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1), cat_selector),
+# Pipeline pour la préparation des données
+preprocessor = make_column_transformer(
+    (SimpleImputer(strategy="mean"), ["year", "km_driven"]),
+    (OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1), ["brand"])
 )
 
-params = {"n_estimators": 100, "random_state": 42}
-rfr_pipeline = make_pipeline(tree_processor, RandomForestRegressor(**params))
+# Construire le pipeline
+pipeline = make_pipeline(preprocessor, RandomForestRegressor(random_state=42))
 
-# Entraîner le modèle
-print("Entraînement du modèle en cours...")
-rfr_pipeline.fit(x_train, y_train)
-print("Modèle entraîné avec succès.")
+# Paramètres pour RandomizedSearchCV
+param_distributions = {
+    "randomforestregressor__n_estimators": [100, 200, 300, 400, 500],
+    "randomforestregressor__max_depth": [None, 10, 20, 30, 40],
+    "randomforestregressor__min_samples_split": [2, 5, 10],
+    "randomforestregressor__min_samples_leaf": [1, 2, 4],
+    "randomforestregressor__max_features": ["auto", "sqrt", "log2"]
+}
 
-# Prédictions sur l'ensemble de test
-y_pred = rfr_pipeline.predict(x_test)
+# RandomizedSearchCV
+print("Recherche des meilleurs hyperparamètres en cours...")
+search = RandomizedSearchCV(
+    pipeline,
+    param_distributions,
+    n_iter=50,
+    scoring="neg_mean_squared_error",
+    cv=3,
+    verbose=1,
+    random_state=42,
+    n_jobs=-1
+)
 
-# Sauvegarder un encodeur spécifique pour `brand`
-try:
-    ordinal_encoder = tree_processor.named_transformers_["ordinalencoder"]
-    brand_categories = ordinal_encoder.categories_[2]  # `brand` est la 3ème colonne
-    # Créer un encodeur spécifique pour `brand`
-    brand_encoder = OrdinalEncoder(categories=[brand_categories], handle_unknown="use_encoded_value", unknown_value=-1)
-    # Fitter l'encodeur pour qu'il soit prêt à l'emploi
-    brand_encoder.fit(X[["brand"]])
-    # Sauvegarder l'encodeur fitté
-    joblib.dump(brand_encoder, "brand_encoder.pkl")
-    print(f"Encodeur pour 'brand' sauvegardé avec succès : {brand_categories}")
-except Exception as e:
-    print(f"Erreur lors de la sauvegarde de l'encodeur : {e}")
+search.fit(x_train, y_train)
+best_model = search.best_estimator_
+print(f"Meilleurs hyperparamètres : {search.best_params_}")
 
-# Configurer MLflow
+# Évaluation sur les données de test
+y_pred = best_model.predict(x_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+print(f"Mean Squared Error : {mse}")
+print(f"R² : {r2}")
+
+# Signature pour MLflow
+signature = infer_signature(x_test, y_pred)
+
+# Intégration avec MLflow
 mlflow.set_tracking_uri("http://127.0.0.1:8080")
-mlflow.set_experiment("test_experiment")
+mlflow.set_experiment("optimized_experiment")
 
-# Loguer le modèle avec MLflow
 with mlflow.start_run():
-    # Loguer les paramètres
-    mlflow.log_params(params)
-
-    # Calculer et loguer les métriques
-    r2_score = rfr_pipeline.score(x_test, y_test)
-    print(f"Score R2 sur l'ensemble de test : {r2_score:.4f}")
-    mlflow.log_metric("r2_score", r2_score)
-
-    # Signature des données
-    signature = infer_signature(x_test, y_pred)
-
-    # Loguer l'encodeur
-    mlflow.log_artifact("brand_encoder.pkl")
-
-    # Loguer le modèle
+    mlflow.log_params(search.best_params_)
+    mlflow.log_metric("mse", mse)
+    mlflow.log_metric("r2", r2)
     mlflow.sklearn.log_model(
-        sk_model=rfr_pipeline,
-        artifact_path="model",
+        sk_model=best_model,
+        artifact_path="optimized_model",
         signature=signature,
-        registered_model_name="RandomForestPipeline"
+        registered_model_name="OptimizedRandomForestModel",
     )
-
-    print("Modèle et artefacts logués avec succès dans MLflow.")
-
-print("Run MLflow terminé avec succès.")
+    print("Modèle optimisé logué avec succès dans MLflow.")

@@ -6,9 +6,9 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
 
 ## Fonctionnalités
 
-- **Endpoint ****`/status`** : Permet de vérifier si l'API est prête.
-- **Endpoint ****`/predict`** : Permet d'envoyer les caractéristiques d'un véhicule et d'obtenir une estimation de son prix de vente.
-- **Endpoint ****`/metadata`** : Fournit des informations sur le modèle et les mappages utilisés pour la transformation des données.
+- **Endpoint **`/status`** : Permet de vérifier si l'API est prête.
+- **Endpoint **`/predict`** : Permet d'envoyer les caractéristiques d'un véhicule et d'obtenir une estimation de son prix de vente.
+- **Endpoint **`/metadata`** : Fournit des informations sur le modèle et les mappages utilisés pour la transformation des données.
 
 ---
 
@@ -37,6 +37,11 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
     |
     |-- data/                  # Données (exemple : cartest.csv)
     |-- mlruns/                # Dossier généré par MLflow (optionnel)
+    |
+    |-- scripts/OneOrdinal/    # Scripts liés à MLflow
+        |-- train_model.py     # Script pour entraîner et enregistrer le modèle
+        |-- predict_model.py   # Script pour effectuer des prédictions
+        |-- model_evaluation.py # Script pour évaluer le modèle
 ```
 
 ---
@@ -51,7 +56,7 @@ Assurez-vous que les données nécessaires au modèle sont disponibles dans le d
 ### **Étape 2 : Entraîner et enregistrer le modèle**
 1. Naviguez dans le dossier contenant les scripts :
    ```bash
-   cd scripts/OneHot
+   cd scripts/OneOrdinal
    ```
 
 2. Lancez le script `train_model.py` pour entraîner et enregistrer le modèle dans MLflow :
@@ -61,25 +66,44 @@ Assurez-vous que les données nécessaires au modèle sont disponibles dans le d
 
 3. Une fois l'exécution terminée :
    - Un nouveau modèle sera enregistré dans MLflow.
-   - Les métriques d'entraînment, comme le **Mean Squared Error**, seront affichées.
+   - Les métriques d'entraînement, comme le **Mean Squared Error**, seront affichées.
    - Vous pouvez consulter le modèle et les artefacts associés dans l'interface MLflow :
      [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 ---
 
 ### **Étape 3 : Tester le modèle**
-1. Lancez le script `test_model.py` pour vérifier le fonctionnement du modèle avec des données de test :
+1. Lancez le script `predict_model.py` pour tester le modèle avec une observation personnalisée :
    ```bash
-   python test_model.py
+   python predict_model.py
    ```
 
-2. Le script affichera :
-   - Les données de test utilisées.
-   - Les prédictions générées par le modèle.
+2. Le script affichera les caractéristiques utilisateur, les données transformées et le prix prédit. Exemple :
+   ```bash
+   Données utilisateur : {'year': 2015, 'km_driven': 45000, 'fuel': 'Petrol', 'transmission': 'Manual', 'owner': 'First Owner', 'seller_type': 'Dealer', 'brand': 'Hyundai'}
+   Données transformées pour le modèle : {'year': 2015, 'km_driven': 45000, 'fuel': 1, 'transmission': 1, 'owner': 0, 'seller_type': 0, 'brand': 0}
+   Prix prédit : 550000.0
+   ```
+
+3. Modifiez les caractéristiques utilisateur directement dans le script pour tester d'autres scénarios.
 
 ---
 
-### **Étape 4 : Lancer l'API**
+### **Étape 4 : Évaluer le modèle**
+1. Lancez le script `model_evaluation.py` pour évaluer les performances du modèle sur un jeu de test :
+   ```bash
+   python model_evaluation.py
+   ```
+
+2. Le script affichera :
+   - Un tableau comparant les prix réels et prédits.
+   - Une visualisation graphique des différences entre les prédictions et les valeurs réelles.
+
+3. Les résultats peuvent être sauvegardés dans un fichier CSV pour une analyse ultérieure.
+
+---
+
+### **Étape 5 : Lancer l'API**
 1. Une fois le modèle correctement enregistré et testé, lancez le serveur FastAPI pour servir le modèle :
    ```bash
    uvicorn main:app --reload
@@ -120,6 +144,8 @@ curl -X POST http://127.0.0.1:8000/predict \
     "km_driven": 45000,
     "fuel": "Petrol",
     "transmission": "Manual",
+    "owner": "First Owner",
+    "seller_type": "Dealer",
     "brand": "Hyundai"
 }'
 ```
@@ -188,4 +214,3 @@ Réponse (exemple) :
 1. Ajouter des logs pour les prédictions dans MLflow.
 2. Dockeriser l'application pour faciliter le déploiement.
 3. Intégrer des tests automatisés pour valider les endpoints.
-

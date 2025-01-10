@@ -11,7 +11,7 @@ __pycache__/
 # Artefacts générés par MLflow
 mlruns/
 mlartifacts/
-#*.pkl
+*.pkl
 *.h5
 
 # Données brutes ou fichiers sensibles
