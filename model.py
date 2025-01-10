@@ -8,11 +8,13 @@ from sklearn.preprocessing import OrdinalEncoder
 import joblib
 
 # Charger les données
-df = pd.read_csv("cartest.csv")
+df = pd.read_csv("./data/cartest.csv")
 
 # Préparer les données
 df["fuel"].replace({'Diesel': 0, 'Petrol': 1, 'LPG': 2, 'CNG': 3, 'Electric': 4}, inplace=True)
 df["transmission"].replace({'Automatic': 0, 'Manual': 1}, inplace=True)
+df["owner"].replace({'First Owner': 0, 'Second Owner': 1, 'Third Owner': 2, 'Fourth & Above Owner': 3, 'Test Drive Car': 4}, inplace=True)  
+df["seller_type"].replace({'Dealer': 0, 'Individual': 1}, inplace=True)
 df["brand"] = df["name"].str.split().str[0]
 df = df.drop("name", axis=1)
 
