@@ -9,6 +9,8 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
 - **Endpoint **`/status`** : Permet de vérifier si l'API est prête.
 - **Endpoint **`/predict`** : Permet d'envoyer les caractéristiques d'un véhicule et d'obtenir une estimation de son prix de vente.
 - **Endpoint **`/metadata`** : Fournit des informations sur le modèle et les mappages utilisés pour la transformation des données.
+- **Endpoint **`/explain`** : Permet de comprendre pourquoi le modèle a prédit une certaine valeur en affichant les impacts des caractéristiques sur la prédiction.
+- **Endpoint **`/explain-visual`** : Fournit un graphique visuel basé sur SHAP pour illustrer les impacts des caractéristiques sur la prédiction.
 
 ---
 
@@ -185,6 +187,65 @@ Réponse (exemple) :
   "status": "Modèle chargé avec succès"
 }
 ```
+
+### 4. Tester l'Endpoint `/explain`
+
+Requête :
+
+```bash
+curl -X POST http://127.0.0.1:8000/explain \
+-H "Content-Type: application/json" \
+-d '{
+    "year": 2015,
+    "km_driven": 45000,
+    "fuel": "Petrol",
+    "transmission": "Manual",
+    "owner": "First Owner",
+    "seller_type": "Dealer",
+    "brand": "Hyundai"
+}'
+```
+
+Réponse (exemple) :
+
+```json
+{
+  "base_value": 287795.79,
+  "prediction": 495970.11,
+  "feature_impact": {
+    "year": "Contribution positive importante : +286507.35",
+    "km_driven": "Réduction due au kilométrage élevé : -88333.03",
+    "fuel": "Pas d'impact significatif",
+    "seller_type": "Pas d'impact significatif",
+    "transmission": "Pas d'impact significatif",
+    "owner": "Pas d'impact significatif",
+    "brand": "Pas d'impact significatif"
+  }
+}
+```
+
+### 5. Tester l'Endpoint `/explain-visual`
+
+Requête :
+
+```bash
+curl -X POST http://127.0.0.1:8000/explain-visual \
+-H "Content-Type: application/json" \
+-d '{
+    "year": 2015,
+    "km_driven": 45000,
+    "fuel": "Petrol",
+    "transmission": "Manual",
+    "owner": "First Owner",
+    "seller_type": "Dealer",
+    "brand": "Hyundai"
+}'
+```
+
+Réponse :
+
+Un graphique visuel s'ouvre pour montrer les impacts des caractéristiques sur la prédiction.
+
 
 ---
 
