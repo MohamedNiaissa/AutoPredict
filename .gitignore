@@ -37,3 +37,5 @@ build/
 # Clés ou certificats (exemple pour FastAPI HTTPS)
 *.pem
 *.key
+
+.DS_Store
