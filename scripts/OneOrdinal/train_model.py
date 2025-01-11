@@ -9,7 +9,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 from mlflow.models.signature import infer_signature
 import mlflow
 import mlflow.sklearn
-import numpy as np
 
 # Charger les données
 df = pd.read_csv("./data/cartest.csv")
