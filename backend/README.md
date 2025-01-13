@@ -18,6 +18,9 @@ Ce projet implémente une API REST avec **FastAPI** pour servir un modèle machi
 
 1. **Python 3.9+**
 2. Installer les dépendances Python :
+```bash
+   cd backend
+   ```
    ```bash
    pip install -r requirements.txt
    ```
