@@ -11,12 +11,12 @@ Ce document analyse les aspects critiques et éthiques du projet de prédiction 
 - **Qualité des données** : Le dataset utilisé peut contenir des biais liés à des valeurs manquantes, des incohérences ou des erreurs de saisie. Ces problèmes peuvent affecter la précision du modèle.
 - **Représentativité des données** : Si les données ne couvrent pas suffisamment de cas d'usage (par exemple, types de véhicules, régions géographiques), le modèle pourrait ne pas bien généraliser.
 - **Temporalité** : Les prix des voitures d'occasion peuvent varier dans le temps, mais le dataset utilisé ne prend pas en compte les tendances du marché.
+- **Localisation**: Les données du dataset proviennent d'Inde, il se pourrait que notre model soit influencé par la tendance dans ce pays et compromettre l’adaptabilité dans d’autres situations.
+---
 
 ### 2.2. Performances du Modèle
 - **Modèle choisi** : Random Forest a été sélectionné pour ses performances et sa robustesse, mais il peut être moins performant pour des prédictions sur des cas atypiques.
 - **Modèles non sélectionnés** : LassoCV, bien qu’utile pour la sélection de caractéristiques, n’a pas donné de résultats satisfaisants. Cela montre que les relations linéaires ne suffisent pas à expliquer les données.
-- **Localisation**: Les données du dataset proviennent d'Inde, il se pourrait que notre model soit influencé par la tendance dans ce pays et compromettre l’adaptabilité dans d’autres situations.
----
 
 ## 3. Analyse Éthique
 
