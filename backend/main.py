@@ -246,12 +246,11 @@ async def explain_visual(features: CarFeatures):
         # Mapper les valeurs textuelles
         fuel = FUEL_MAPPING.get(features.fuel)
         transmission = TRANSMISSION_MAPPING.get(features.transmission)
-        brand = BRAND_MAPPING.get(features.brand)
         owner = OWNER_MAPPING.get(features.owner)
         seller_type = SELLER_TYPE_MAPPING.get(features.seller_type)
 
         # Valider les entrées
-        if fuel is None or transmission is None or brand is None or owner is None or seller_type is None:
+        if fuel is None or transmission is None or owner is None or seller_type is None:
             raise ValueError("Certaines valeurs des caractéristiques sont invalides.")
 
         # Préparer les données pour SHAP
