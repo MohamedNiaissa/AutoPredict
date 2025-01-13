@@ -36,12 +36,7 @@ except Exception as e:
 # Mappings pour `fuel`, `transmission`, et `brand`
 FUEL_MAPPING = {"Diesel": 0, "Petrol": 1, "LPG": 2, "CNG": 3, "Electric": 4}
 TRANSMISSION_MAPPING = {"Automatic": 0, "Manual": 1}
-BRAND_MAPPING = {  
-    "Hyundai": 0,
-    "Maruti": 1,
-    "Ford": 2,
-    "Toyota": 3,
-}
+
 OWNER_MAPPING = {
     "First Owner": 0,
     "Second Owner": 1,
@@ -77,9 +72,9 @@ async def get_metadata():
         "model_uri": MODEL_URI,
         "fuel_mapping": FUEL_MAPPING,
         "transmission_mapping": TRANSMISSION_MAPPING,
-        "brand_mapping": list(BRAND_MAPPING.keys()),
         "owner_mapping": list(OWNER_MAPPING.keys()),
         "seller_type_mapping": list(SELLER_TYPE_MAPPING.keys()),
+        "brand_handling": "Directly handled by the model pipeline using OrdinalEncoder.",
         "status": "Modèle chargé avec succès"
     }
 
@@ -92,7 +87,6 @@ async def predict(features: CarFeatures):
         # Mapper les valeurs textuelles
         fuel = FUEL_MAPPING.get(features.fuel)
         transmission = TRANSMISSION_MAPPING.get(features.transmission)
-        brand = BRAND_MAPPING.get(features.brand)
         owner = OWNER_MAPPING.get(features.owner)
         seller_type = SELLER_TYPE_MAPPING.get(features.seller_type)
 
@@ -101,8 +95,6 @@ async def predict(features: CarFeatures):
             raise ValueError(f"Fuel invalide : {features.fuel}. Valeurs possibles : {list(FUEL_MAPPING.keys())}")
         if transmission is None:
             raise ValueError(f"Transmission invalide : {features.transmission}. Valeurs possibles : {list(TRANSMISSION_MAPPING.keys())}")
-        if brand is None:
-            raise ValueError(f"Brand invalide : {features.brand}. Valeurs possibles : {list(BRAND_MAPPING.keys())}")
         if owner is None:
             raise ValueError(f"Owner invalide : {features.owner}. Valeurs possibles : {list(OWNER_MAPPING.keys())}")
         if seller_type is None:
@@ -146,7 +138,7 @@ async def explain(features: CarFeatures):
         # Mapper les valeurs textuelles
         fuel = FUEL_MAPPING.get(features.fuel)
         transmission = TRANSMISSION_MAPPING.get(features.transmission)
-        brand = BRAND_MAPPING.get(features.brand)
+        brand = features.brand
         owner = OWNER_MAPPING.get(features.owner)
         seller_type = SELLER_TYPE_MAPPING.get(features.seller_type)
 
@@ -254,12 +246,11 @@ async def explain_visual(features: CarFeatures):
         # Mapper les valeurs textuelles
         fuel = FUEL_MAPPING.get(features.fuel)
         transmission = TRANSMISSION_MAPPING.get(features.transmission)
-        brand = BRAND_MAPPING.get(features.brand)
         owner = OWNER_MAPPING.get(features.owner)
         seller_type = SELLER_TYPE_MAPPING.get(features.seller_type)
 
         # Valider les entrées
-        if fuel is None or transmission is None or brand is None or owner is None or seller_type is None:
+        if fuel is None or transmission is None or owner is None or seller_type is None:
             raise ValueError("Certaines valeurs des caractéristiques sont invalides.")
 
         # Préparer les données pour SHAP
